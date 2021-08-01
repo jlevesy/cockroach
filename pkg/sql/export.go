@@ -41,7 +41,8 @@ type exportNode struct {
 	// fileNamePattern represents the file naming pattern for the
 	// export, typically to be appended to the destination URI
 	fileNamePattern string
-	csvOpts         roachpb.CSVOptions
+	csvOpts         *roachpb.CSVOptions
+	parquetOpts     *roachpb.ParquetOptions
 	chunkRows       int
 	chunkSize       int64
 	fileCompression execinfrapb.FileCompression
@@ -118,10 +119,6 @@ func (ef *execFactory) ConstructExport(
 		return nil, errors.Errorf("EXPORT cannot be used inside a transaction")
 	}
 
-	if fileFormat != "CSV" {
-		return nil, errors.Errorf("unsupported export format: %q", fileFormat)
-	}
-
 	destinationDatum, err := fileName.Eval(ef.planner.EvalContext())
 	if err != nil {
 		return nil, err
@@ -131,6 +128,7 @@ func (ef *execFactory) ConstructExport(
 	if !ok {
 		return nil, errors.Errorf("expected string value for the file location")
 	}
+
 	admin, err := ef.planner.HasAdminRole(ef.planner.EvalContext().Context)
 	if err != nil {
 		panic(err)
@@ -150,19 +148,6 @@ func (ef *execFactory) ConstructExport(
 	optVals, err := evalStringOptions(ef.planner.EvalContext(), options, exportOptionExpectValues)
 	if err != nil {
 		return nil, err
-	}
-
-	csvOpts := roachpb.CSVOptions{}
-
-	if override, ok := optVals[exportOptionDelimiter]; ok {
-		csvOpts.Comma, err = util.GetSingleRune(override)
-		if err != nil {
-			return nil, pgerror.New(pgcode.InvalidParameterValue, "invalid delimiter")
-		}
-	}
-
-	if override, ok := optVals[exportOptionNullAs]; ok {
-		csvOpts.NullEncoding = &override
 	}
 
 	chunkRows := exportChunkRowsDefault
@@ -202,13 +187,43 @@ func (ef *execFactory) ConstructExport(
 	exportID := ef.planner.stmt.QueryID.String()
 	namePattern := fmt.Sprintf("export%s-%s", exportID, exportFilePatternDefault)
 
-	return &exportNode{
-		source:          input.(planNode),
-		destination:     string(*destination),
-		fileNamePattern: namePattern,
-		csvOpts:         csvOpts,
-		chunkRows:       chunkRows,
-		chunkSize:       chunkSize,
-		fileCompression: codec,
-	}, nil
+	switch fileFormat {
+	case "CSV":
+		csvOpts := roachpb.CSVOptions{}
+
+		if override, ok := optVals[exportOptionDelimiter]; ok {
+			csvOpts.Comma, err = util.GetSingleRune(override)
+			if err != nil {
+				return nil, pgerror.New(pgcode.InvalidParameterValue, "invalid delimiter")
+			}
+		}
+
+		if override, ok := optVals[exportOptionNullAs]; ok {
+			csvOpts.NullEncoding = &override
+		}
+
+		return &exportNode{
+			source:          input.(planNode),
+			destination:     string(*destination),
+			fileNamePattern: namePattern,
+			csvOpts:         &csvOpts,
+			chunkRows:       chunkRows,
+			chunkSize:       chunkSize,
+			fileCompression: codec,
+		}, nil
+	case "PARQUET":
+		parquetOpts := roachpb.ParquetOptions{}
+		// TODO(jly): parquet opts...
+
+		return &exportNode{
+			source:          input.(planNode),
+			destination:     string(*destination),
+			parquetOpts:     &parquetOpts,
+			fileNamePattern: namePattern,
+			chunkRows:       chunkRows,
+			chunkSize:       chunkSize,
+		}, nil
+	default:
+		return nil, errors.Errorf("unsupported export format: %q", fileFormat)
+	}
 }
