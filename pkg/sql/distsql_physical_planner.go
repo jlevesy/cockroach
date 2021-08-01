@@ -3886,15 +3886,33 @@ func (dsp *DistSQLPlanner) createPlanForExport(
 	if err != nil {
 		return nil, err
 	}
-	core := execinfrapb.ProcessorCoreUnion{CSVWriter: &execinfrapb.CSVWriterSpec{
-		Destination:      n.destination,
-		NamePattern:      n.fileNamePattern,
-		Options:          n.csvOpts,
-		ChunkRows:        int64(n.chunkRows),
-		ChunkSize:        n.chunkSize,
-		CompressionCodec: n.fileCompression,
-		UserProto:        planCtx.planner.User().EncodeProto(),
-	}}
+
+	var core execinfrapb.ProcessorCoreUnion
+
+	switch {
+	case n.csvOpts != nil:
+		core.CSVWriter = &execinfrapb.CSVWriterSpec{
+			Destination:      n.destination,
+			NamePattern:      n.fileNamePattern,
+			Options:          *n.csvOpts,
+			ChunkRows:        int64(n.chunkRows),
+			ChunkSize:        n.chunkSize,
+			CompressionCodec: n.fileCompression,
+			UserProto:        planCtx.planner.User().EncodeProto(),
+		}
+	case n.parquetOpts != nil:
+		core.ParquetWriter = &execinfrapb.ParquetWriterSpec{
+			Destination:      n.destination,
+			NamePattern:      n.fileNamePattern,
+			Options:          *n.parquetOpts,
+			ChunkRows:        int64(n.chunkRows),
+			ChunkSize:        n.chunkSize,
+			CompressionCodec: n.fileCompression,
+			UserProto:        planCtx.planner.User().EncodeProto(),
+		}
+	default:
+		return nil, errors.New("invalid export node")
+	}
 
 	resTypes := make([]*types.T, len(colinfo.ExportColumns))
 	for i := range colinfo.ExportColumns {
@@ -3904,7 +3922,7 @@ func (dsp *DistSQLPlanner) createPlanForExport(
 		core, execinfrapb.PostProcessSpec{}, resTypes, execinfrapb.Ordering{},
 	)
 
-	// The CSVWriter produces the same columns as the EXPORT statement.
+	// Both CSVWriter and ParquetWriter produces the same columns as the EXPORT statement.
 	plan.PlanToStreamColMap = identityMap(plan.PlanToStreamColMap, len(colinfo.ExportColumns))
 	return plan, nil
 }
