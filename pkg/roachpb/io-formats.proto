@@ -64,6 +64,11 @@ message CSVOptions {
   optional int64 row_limit = 6 [(gogoproto.nullable) = false];
 }
 
+// ParquetOptions describe the format of parquet data.
+message ParquetOptions{
+  // TODO(jly):
+}
+
 // MySQLOutfileOptions describe the format of mysql's outfile.
 message MySQLOutfileOptions {
   enum Enclose {
