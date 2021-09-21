@@ -144,8 +144,9 @@ def go_deps():
         name = "com_github_apache_thrift",
         build_file_proto_mode = "disable_global",
         importpath = "github.com/apache/thrift",
-        sum = "h1:v7Gpsj71uh9fOCX0v9mS7thFJdguCgV11wTv0wMe4pE=",
-        version = "v0.0.0-20181211084444-2b7365c54f82",
+        replace = "github.com/apache/thrift",
+        sum = "h1:5hryIiq9gtn+MiLVn0wP37kb/uTeRZgN08WoCsAhIhI=",
+        version = "v0.13.0",
     )
     go_repository(
         name = "com_github_armon_circbuf",
@@ -1174,6 +1175,14 @@ def go_deps():
         sum = "h1:8sXhOn0uLys67V8EsXLc6eszDs8VXWxL3iRvebPhedY=",
         version = "v1.11.3",
     )
+    go_repository(
+        name = "com_github_fraugster_parquet_go",
+        build_file_proto_mode = "disable_global",
+        importpath = "github.com/fraugster/parquet-go",
+        sum = "h1:40R9R1brJMUSL8EGY1fe5qPHHSmJ2gjqO0vk2w+9KCI=",
+        version = "v0.3.0",
+    )
+
     go_repository(
         name = "com_github_fsnotify_fsnotify",
         build_file_proto_mode = "disable_global",

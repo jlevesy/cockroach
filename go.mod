@@ -25,7 +25,7 @@ require (
 	github.com/andy-kimball/arenaskl v0.0.0-20200617143215-f701008588b9
 	github.com/andybalholm/cascadia v1.2.0 // indirect
 	github.com/apache/arrow/go/arrow v0.0.0-20200610220642-670890229854
-	github.com/apache/thrift v0.0.0-20181211084444-2b7365c54f82 // indirect
+	github.com/apache/thrift v0.15.0 // indirect
 	github.com/armon/circbuf v0.0.0-20150827004946-bbbad097214e
 	github.com/aws/aws-sdk-go v1.38.69
 	github.com/axiomhq/hyperloglog v0.0.0-20181223111420-4b99d0c2c99e
@@ -63,6 +63,7 @@ require (
 	github.com/elastic/gosigar v0.10.0
 	github.com/emicklei/dot v0.15.0
 	github.com/facebookgo/clock v0.0.0-20150410010913-600d898af40a
+	github.com/fraugster/parquet-go v0.3.0
 	github.com/ghemawat/stream v0.0.0-20171120220530-696b145b53b9
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/go-swagger/go-swagger v0.26.1
@@ -175,6 +176,8 @@ require (
 	honnef.co/go/tools v0.2.0
 	vitess.io/vitess v0.0.0-00010101000000-000000000000
 )
+
+replace github.com/apache/thrift => github.com/apache/thrift v0.13.0
 
 replace github.com/olekukonko/tablewriter => github.com/cockroachdb/tablewriter v0.0.5-0.20200105123400-bd15540e8847
 
