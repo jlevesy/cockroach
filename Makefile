@@ -519,7 +519,7 @@ C_LIBS_CCL = $(C_LIBS_COMMON)
 C_LIBS_DYNAMIC = $(LIBGEOS)
 
 # We only include krb5 on linux, non-musl builds.
-ifeq "$(findstring linux-gnu,$(TARGET_TRIPLE))" "linux-gnu"
+ifeq "$(findstring linux-gnu,$(TARGET_TRIPLE))" "linux-gnuxx"
 C_LIBS_CCL += $(LIBKRB5)
 C_LIBS_SHORT += $(LIBKRB5)
 KRB_CPPFLAGS := $(KRB5_DIR)/include
