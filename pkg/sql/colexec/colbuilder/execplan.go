@@ -2080,6 +2080,40 @@ func planProjectionOperators(
 			ctx, evalCtx, t.Operator, t.ResolvedType(), t.TypedLeft(), t.TypedRight(),
 			columnTypes, input, acc, factory, t.Fn.Fn, nil /* cmpExpr */, releasables,
 		)
+	case *tree.CoalesceExpr:
+		var (
+			allocator      = colmem.NewAllocator(ctx, acc, factory)
+			outputType     = t.ResolvedType()
+			outputIdx      = len(columnTypes)
+			typs           = appendOneType(columnTypes, outputType)
+			ops            = make([]colexecop.Operator, len(t.Exprs))
+			exprIdxs       = make([]int, len(t.Exprs))
+			schemaEnforcer = colexecutils.NewBatchSchemaSubsetEnforcer(
+				allocator, input, typs, outputIdx, -1, /* subsetEndIdx */
+			)
+			buffer = colexec.NewBufferOp(schemaEnforcer)
+		)
+
+		for i, expr := range t.Exprs {
+			typedExpr := expr.(tree.TypedExpr)
+			ops[i], exprIdxs[i], typs, err = planProjectionOperators(
+				ctx, evalCtx, typedExpr, typs, buffer, acc, factory, releasables,
+			)
+
+			if err != nil {
+				return nil, resultIdx, typs, err
+			}
+		}
+
+		schemaEnforcer.SetTypes(typs)
+		return colexec.NewCoalesceProjOp(
+			allocator,
+			buffer,
+			ops,
+			exprIdxs,
+			outputIdx,
+			outputType,
+		), outputIdx, typs, nil
 	case *tree.IsNullExpr:
 		return planIsNullProjectionOp(ctx, evalCtx, t.ResolvedType(), t.TypedInnerExpr(), columnTypes, input, acc, false /* negate */, factory, releasables)
 	case *tree.IsNotNullExpr:
