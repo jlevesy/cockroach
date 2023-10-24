@@ -1814,8 +1814,9 @@
     to-fast-properties "^2.0.0"
 
 "@cockroachlabs/cluster-ui@link:./cluster-ui":
-  version "0.0.0"
-  uid ""
+  version "21.2.0-prerelease-3"
+  dependencies:
+    "@babel/runtime" "^7.12.13"
 
 "@cockroachlabs/eslint-config@^0.1.11":
   version "0.1.11"
@@ -8550,9 +8551,9 @@ locate-path@^5.0.0:
     p-locate "^4.1.0"
 
 lodash-es@^4.17.11:
-  version "4.17.15"
-  resolved "https://registry.yarnpkg.com/lodash-es/-/lodash-es-4.17.15.tgz#21bd96839354412f23d7a10340e5eac6ee455d78"
-  integrity sha512-rlrc3yU3+JNOpZ9zj5pQtxnx2THmvRykwL4Xlxoa8I9lHBlVbbyPhgyPMioxVZ4NqyxaVVtaJnzsyOidQIhyyQ==
+  version "4.17.21"
+  resolved "https://registry.yarnpkg.com/lodash-es/-/lodash-es-4.17.21.tgz#43e626c46e6591b7750beb2b50117390c609e3ee"
+  integrity sha512-mKnC+QJ9pWVzv+C4/U3rRsHapFfHvQFoFB92e52xeyGMcX6/OlIl78je1u8vePzYZSkkogMPJ2yjxxsb89cxyw==
 
 lodash.assign@^4.0.3:
   version "4.2.0"
